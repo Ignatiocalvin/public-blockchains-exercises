@@ -40,18 +40,24 @@ console.log(pathToDotEnv);
 // Hint: use path.join(...) to build a relative path to the .env file. 
 
 // Edit this line, then load the .env file:
-// pathToDotEnv = path.join(...);
+const path = require('path');
+
+pathToDotEnv = path.join(__dirname, '.', '..', '.env');
 console.log(pathToDotEnv);
 
 // Your code here.
+require("dotenv").config();
 
 // c. Bonus. Load the 'fs' native module and use the method `existsSync` to 
 // check if the path to the .dotenv file is correct.
 
 // Your code here.
+const fs = require('fs');
 
-
-
+console.log(pathToDotEnv);
+if (fs.existsSync(pathToDotEnv)) {
+    console.log('You found the .env file!')
+}
 
 // Exercise 2. Create and fill in .env file.
 ////////////////////////////////////////////
@@ -93,6 +99,15 @@ exercise = '3a';
 // Hint: https://javascript.info/ifelse
 
 // Your code here!
+// require is import 
+require("dotenv").config();
+
+console.log(process.env.METAMASK_ACCOUNT_1);
+
+let privateKey = process.env.METAMASK_PRIVATE_KEY;
+if (privateKey === "") {
+    console.log('Missing private key, fix your .env file');
+}
 
 // exit();
 
@@ -103,6 +118,16 @@ exercise = '3a';
 exercise = '3b';
 
 // Your code here!
+require("dotenv").config();
+
+let variablesToCheck = [
+    "INFURA_KEY", "INFURA_SEPOLIA", "INFURA_GOERLI", "INFURA_MAINNET",
+    "ALCHEMY_KEY", "ALCHEMY_SEPOLIA", "ALCHEMY_GOERLI", "ALCHEMY_MAINNET",
+    "METAMASK_1_ADDRESS", "METAMASK_1_PRIVATE_KEY",
+    "METAMASK_2_ADDRESS", "METAMASK_2_PRIVATE_KEY",
+    "ETHERSCAN_KEY"
+];
+console.log(variablesToCheck.length);
 
 // exit();
 
@@ -116,10 +141,20 @@ exercise = '3b';
 
 // Solution 1. forEach.
 variablesToCheck.forEach(v => {
-    // Your code here!
+   if (!process.env[v]){
+    console.log(process.env[v])
+    console.log(`Missing ${v}, fix your .env file`)
+   }
 });
 
+
 // Solution 2. For-loop.
+for(let index=0; index < variablesToCheck.length; index++){
+    const v = variablesToCheck[index];
+    if (!process.env[v]){
+        console.log(process.env[v])
+    }
+}
 
 // Your code here!
 

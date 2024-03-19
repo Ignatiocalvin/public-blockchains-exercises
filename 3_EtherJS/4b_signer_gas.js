@@ -1,6 +1,15 @@
 // Loading path module for operations with file paths.
 const path = require('path');
 
+require('dotenv').config();
+const ethers = require("ethers");
+
+const providerKey = process.env.ALCHEMY_KEY;
+const sepoliaUrl = `${process.env.ALCHEMY_SEPOLIA_API_URL}${providerKey}`;
+const sepoliaProvider = new ethers.JsonRpcProvider(sepoliaUrl);
+
+let signer = new ethers.Wallet(process.env.METAMASK_PRIVATE_KEY, sepoliaProvider);
+
 // Ethers JS: Signers: Gas and Transactions.
 ////////////////////////////////////////////
 
@@ -65,13 +74,37 @@ const path = require('path');
 // Hint: the simple math is also explained in one of the links above.
 
 // a, b, c. 
+const account2 = process.env.METAMASK_2_ADDRESS;
+
 const checkGasPrices = async () => {
 
     // Your code here!
+    setInterval(async () => {
+        let tx = await signer.populateTransaction({
+            to: account2,
+            value: ethers.parseEther('0.01'),
 
+    });
+
+    console.log("Gas Limit: ", tx.gasLimit);
+    console.log('Max Fee per Gas (GWEI)', ethers.formatUnits(tx.maxFeePerGas, 'gwei'));
+    console.log('Max Priority Fee (GWEI)', ethers.formatUnits(tx.maxPriorityFeePerGas, 'gwei'));
+
+    console.log('---');
+    const feeData = await goerliProvider.getFeeData();
+
+    console.log('Legacy Gas Price (GWEI)', ethers.formatUnits(feeData.gasPrice, 'gwei'));
+    console.log('Max Fee per Gas (GWEI)', ethers.formatUnits(feeData.maxFeePerGas, 'gwei'));
+    console.log('Max Priority Fee (GWEI)', ethers.formatUnits(feeData.maxPriorityFeePerGas, 'gwei'));
+
+    console.log('');
+    const lastBlock = await goerliProvider.getBlock('latest');
+    console.log('Base Fee Previous Block (GWEI)', ethers.formatUnits(lastBlock.baseFeePerGas, 'gwei'));
+
+    }, 1000);
 };
 
-// checkGasPrices();
+checkGasPrices();
 
 // d. Now that you understand everything, send a new transaction that is just
 // a little cheaper in terms of gas, compared to defaults.

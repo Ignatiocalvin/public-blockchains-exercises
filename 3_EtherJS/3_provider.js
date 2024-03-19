@@ -15,7 +15,10 @@ const path = require('path');
 /////////////////////////////////////////////////////////
 
 // Hint: As you did in file 1_wallet.
-
+pathToDotEnv = path.join(__dirname, '.', '..', '.env');
+require('dotenv').config({path: pathToDotEnv})
+const ethers = require("ethers");
+// console.log(pathToDotEnv);
 // Your code here!
 
 
@@ -47,9 +50,15 @@ const path = require('path');
 
 
 // Your code here!
+const providerKey = process.env.ALCHEMY_KEY;
+
+const mainnetUrl = `${process.env.ALCHEMY_MAINNET_API_URL}${providerKey}`
+const mainnetProvider = new ethers.JsonRpcProvider(mainnetUrl);
+// console.log(mainnetUrl)
 
 
 // b. Verify that the network's name is "mainnet" and the chain id is 1.
+
 
 // Hint: `getNetwork()`.
 
@@ -59,24 +68,12 @@ const path = require('path');
 // https://javascript.info/bigint 
 
 // b1. Use the async/await pattern to do the job.
-
-
-// This is an asynchronous anonymous self-executing function. It is a ugly
-// construct, but it allows you to use await inside its body.
-(async () => {
-    
-    // Your code maybe here!
-
-})();
-
-// However, the async function could also be named, and the result is:
 const network = async () => {
-    
-    // Your code here!
-
-};
-
-// which you can then call:
+    let net = await mainnetProvider.getNetwork();
+    console.log('Async/Await!');
+    console.log('Provider\'s network name: ', net.name);
+    console.log('Provider\'s network chain id: ', Number(net.chainId));
+}
 
 // network();
 
@@ -87,8 +84,16 @@ const network = async () => {
 
 // Promises.
 
+// we save the network details that we get/await into net
+mainnetProvider.getNetwork().then(net => {
+    console.log('Promise!');
+    console.log('Provider\'s network name: ', net.name);
+    console.log('Provider\'s network chain id: ', Number(net.chainId));
+})
+
 // Checkpoint. We use `return` to terminate the execution insted
 // of process.exit(). Why?
+// because it's not a function that we call. 
 // return;
 
 
@@ -101,9 +106,8 @@ const network = async () => {
 
 // // Look up the current block number
 const blockNum = async () => {
-    
-    // Your code here!
-
+    let blockNumber = await mainnetProvider.getBlockNumber();
+    console.log('Mainnet block number: ', blockNumber);
 };
 
 // blockNum();
@@ -116,10 +120,18 @@ const blockNum = async () => {
 // Connect to the Goerli test net, get the latest block number and print
 // the difference in chain length with mainnet.
 
+const sepoliaUrl = `${process.env.ALCHEMY_SEPOLIA_API_URL}${providerKey}`;
+const sepoliaProvider = new ethers.JsonRpcProvider(sepoliaUrl);
 
 // Look up the current block number in Mainnet and Goerli.
 const blockDiff = async () => {
+    let blockNumberM = await mainnetProvider.getBlockNumber();
+    console.log('Mainnet block number: ', blockNumberM);
 
+    let blockNumberS = await sepoliaProvider.getBlockNumber();
+    console.log('Sepolia block number: ', blockNumberS);
+
+    console.log('Mainnet is '+ (blockNumberM - blockNumberS) + ' blocks ahead');
 };
 
 // blockDiff();
@@ -144,6 +156,11 @@ const blockDiff = async () => {
 const checkBlockTime = async (providerName = "mainnet", blocks2check = 3) => {
 
     // JS Ternary Operator.
+    // What is a JS Ternary Operator? 
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator
+    // It is a short way to write an if-else statement.
+    // condition ? expressionIfTrue : expressionIfFalse
+
     let provider = providerName.toLowerCase() === "mainnet" ? 
         mainnetProvider : goerliProvider;
 
@@ -195,6 +212,24 @@ const checkBlockTime = async (providerName = "mainnet", blocks2check = 3) => {
 const checkBlockTime2 = async (providerName = "mainnet", blocks2check = 3) => {
 
     // Your code here!
+    let provider = providerName.toLowerCase() === "mainnet" ? 
+    mainnetProvider : goerliProvider;
+
+    let d = Date.now();
+    let blocksChecked = 0;
+
+    provider.on('block', newBlockNumber =>{
+        let d2 = Date.now();
+        let timeDiff = d2 - d;
+        console.log(providerName, "New Block num:", newBlockNumber);
+        console.log(providerName, "It took: ", timeDiff)
+    })
+
+    d = d2;
+
+    if(++blocksChecked >= blocks2check){
+        provider.off('block');
+    }
 
 };
 
@@ -223,6 +258,23 @@ const checkBlockTime2 = async (providerName = "mainnet", blocks2check = 3) => {
 const blockInfo = async () => {
     
     // Your code here!
+    let blockNumber = await mainnetProvider.getBlockNumber();
+    let block = await mainnetProvider.getBlock(blockNumber);
+    // console.log(block);
+
+    let tx = block.getTransaction(0);
+    // console.log(tx);
+    let txHash = block.transactions[0];
+    console.log(txHash);
+
+    let txReceipt = await mainnetProvider.getTransactionReceipt(txHash);
+    console.log(txReceipt);
+    console.log('A transaction from', txReceipt.to, 'to', txReceipt.from);
+
+    // Long list...
+    block = await mainnetProvider.getBlock(blockNumber, true);
+    console.log(block.prefetchedTransactions);
+
 
 };
 
@@ -237,10 +289,18 @@ const blockInfo = async () => {
 const ens = async () => {
     
     // Your code here!
+    // Name is a human-readable name for an Ethereum address which is a hexadecimal string.
+    // The address is derived from the public key, but it's not the same thing. (like a nickname)
+    // It takes a public key, hashes it, and truncates it to 20 bytes to form the address.
+    let unimaAddress = await sepoliaProvider.resolveName('unima.eth');
+    console.log(unimaAddress);
+
+    let ensName = await sepoliaProvider.lookupAddress(unimaAddress);
+    console.log(ensName);
 
 };
 
-// ens();
+ens();
 
 
 // Exercise 6. Get ETH balance.
@@ -260,9 +320,16 @@ const ens = async () => {
 
 const balance = async (ensName = "unima.eth") => {
 
-   // Your code here!
+    let balance = await sepoliaProvider.getBalance(ensName);
+    console.log('Balance of', ensName, 'is', ethers.formatEther(balance), 'ETH');
 
+    let address = await sepoliaProvider.resolveName(ensName);
+    let addressBalance = await sepoliaProvider.getBalance(address);
+    console.log('Balance of', address, 'is', ethers.formatEther(addressBalance), 'ETH');
 };
+
+// balance();
+
 
 // balance("vitalik.eth");
 
@@ -286,6 +353,8 @@ const linkAddress = '0x326c977e6efc84e512bb9c30f76e30c160ed06fb';
 // the LINK ABI is stored in this directory, under "link_abi.json";
 
 const linkABI = require('./link_abi.json');
+const { pathToFileURL } = require('url');
+
 
 // Now your task. Get the balance for LINK for "unima.eth" and "vitalik.eth".
 // Hint: you need first to create a Contract object via `ethers.Contract`, 
@@ -296,9 +365,17 @@ const linkABI = require('./link_abi.json');
 const link = async () => {
    
     // Your code here!
+    let linkContract = new ethers.Contract(linkAddress, linkABI, sepoliaProvider);
+
+    let linkBalance = await linkContract.balanceOf('0xFe44A03b5de0852c3647ec788e06377aB76512b4');
+    console.log(ethers.utils.formatEther(linkBalance))
+
+    // let linkContract = new ethers.Contract(linkAddress, linkABI, mainnetProvider);
+    // let linkBalance = await linkContract.balanceOf("unima.eth");
+    // console.log(ethers.utils.formatEther(linkBalance))
+
+    
 };
 
 
-// link();
-
-
+link();

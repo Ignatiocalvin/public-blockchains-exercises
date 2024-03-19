@@ -23,8 +23,16 @@ const path = require('path');
 // Hint: As you did in file 1_wallet and 2_provider.
 
 // Your code here!
+const pathToDotEnv = path.join(__dirname, ".", "..", ".env");
+require('dotenv').config({path: pathToDotEnv});
+
+const ethers = require('ethers');
 
 // b. Create a Sepolia provider.
+const providerKey = process.env.ALCHEMY_KEY;
+
+const sepoliaUrl = `${process.env.ALCHEMY_SEPOLIA_API_URL}${providerKey}`;
+const sepoliaProvider = new ethers.JsonRpcProvider(sepoliaUrl);
 
 // Your code here!
 
@@ -43,21 +51,46 @@ const path = require('path');
 // Hint2: if you get an error here, check that the private key begins with "0x".
 
 // Your code here!
+let signer = new ethers.Wallet(process.env.METAMASK_PRIVATE_KEY);
+console.log(signer.address);
 
 // Exercise 2. Sign something.
 //////////////////////////////
 
 const sign = async (message = 'Hello world') => {
+    const signature = await signer.signMessage(message);
     
-    // Your code here!
+    const verifiedSigner = ethers.verifyMessage(message, signature);
+
+    if (verifiedSigner === signer.address){
+        console.log("Signature verified");
+    }
+    else {
+        console.log("Signature not verified");
+    }
+
+    let anotherMessage = "Give me 5 ETH";
+
+    const verifiedSigner2 = ethers.verifyMessage(anotherMessage, signature)
+
+    if (verifiedSigner2 === signer.address) {
+        console.log('Tampered signature is valid.');
+    }
+    else {
+        console.log('Tampered signature is NOT valid.');
+    }
+
+
 };
 
-// sign();
+sign();
 
 // Exercise 3. Connect to the blockchain. 
 /////////////////////////////////////////
 
 // a. Connect the signer to the Sepolia network.
+// signer is a wallet that's accessed using a private key.
+// To interact with the blockchain, it needs to be connected to a provider using your alchemy key.
 // Hint: .connect()
 
 // b. Print the next nonce necessary to send a transaction.
@@ -65,10 +98,14 @@ const sign = async (message = 'Hello world') => {
 
 const connect = async() => {
     
-    // Your code here!
+    signer = await signer.connect(sepoliaProvider);
+
+    let nonce = await signer.getNonce();
+    console.log('The nonce is', nonce);
+
 };
 
-// connect();
+connect();
 
 // c. Replace the signer created above at exercise 1 with one that takes the 
 // Sepolia provider as second parameter. This is necessary even
@@ -78,6 +115,8 @@ const connect = async() => {
 
 // Replace the signer created above.
 
+// to create a wallet, we need a private key and a provider key. 
+signer = new ethers.Wallet(process.env.METAMASK_PRIVATE_KEY, sepoliaProvider);
 
 
 // Exercise 4. Send a transaction.
@@ -100,9 +139,37 @@ const connect = async() => {
 const account2 = process.env.METAMASK_2_ADDRESS;
 
 const sendTransaction = async () => {
-
     // Your code here!
+    let b1 = await sepoliaProvider.getBalance(signer.address);
+    let b2 = await sepoliaProvider.getBalance(account2);
+    b1 = ethers.formatEther(b1);
+    b2 = ethers.formatEther(b2);
+
+    tx = await signer.sendTransaction({
+        to: account2,
+        value: ethers.parseEther('0.01')
+    });
+
+    console.log(tx);
+
+    console.log('Transaction is in the mempool...');
+    // When we send a transaction in Ethereum, it's added to a pool of pending transactions.
+    // The wait() method waits for the transaction to be mined.
+    // It returns a Promise that resolves when the transaction is mined (included in the blockchain).
+    await tx.wait();
+
+    console.log('Transaction mined!');
+
+    let updatedB1 = await sepoliaProvider.getBalance(signer.address);
+    let updatedB2 = await sepoliaProvider.getBalance(account2);
+    updatedB1 = ethers.formatEther(updatedB1);
+    updatedB2 = ethers.formatEther(updatedB2);
+
+    console.log('Balance for', signer.address, 'changed from', b1, 'to', updatedB1);
+    console.log('Balance for', account2, 'changed from', b2, 'to', updatedB2);
+
+
 };
 
-// sendTransaction();
+sendTransaction();
 

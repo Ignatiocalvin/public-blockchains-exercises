@@ -19,6 +19,11 @@ const ethers = require("ethers");
 // a. Create a random wallet and print the address, the private key,
 // and the mnenomic phrase.
 // Hint: ethers.Wallet.createRandom();
+const wallet = ethers.Wallet.createRandom();
+
+console.log("Address: ", wallet.address);
+console.log("Private Key: ", wallet.privateKey);
+console.log("Public Key: ", wallet.publicKey);
 
 
 // exit();
@@ -42,7 +47,6 @@ console.log("Derivation path:", wallet.path);
 
 // Your code here!
 
-
 // exit();
 
 // Exercise 2. Bonus. Create a Hierarchical Deterministic Wallet.
@@ -56,5 +60,21 @@ exercise = 2;
 // Hint: You need to append an index to the derivation path.
 
 // Your code here!
+const ethers = require("ethers");
+const wallet = ethers.Wallet.createRandom();
+
+let baseDevPath = "m/44'/60'/0'/0/";
+
+let mnemonic = wallet.mnemonic.phrase;
+
+let path, myWallet;
+for(let i = 0; i < 10; i++) {
+    path = `${baseDevPath}${i}`;
+    console.log("mnemonic: ", mnemonic);
+    console.log("path: ", path);
+    myWallet = ethers.HDNodeWallet.fromPhrase(mnemonic, path)
+    console.log("Address", i, myWallet.address);
+    console.log("Private key", i, myWallet.privateKey);
+}
 
 // exit();
