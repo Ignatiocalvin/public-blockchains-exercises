@@ -21,9 +21,9 @@
 // interesting.
 
 const hre = require("hardhat");
-console.log('Hardhat\'s default network:', hre.config.defaultNetwork);
+// console.log('Hardhat\'s default network:', hre.config.defaultNetwork);
 
-return;
+// return;
 
 
 // Exercise 1. Understand Ethers in Hardhat.
@@ -33,15 +33,16 @@ return;
 // Sometimes their version numbers might differ.
 
 // a. Require ethers (as an npm package) and print its version to console.
+const ethers = require("ethers");
+// console.log("Ethers version:", ethers.version);
 
-// Your code here!
-
-return;
+// return;
 
 // b. Now prints the the version of the Hardhat's plugin available under
 // hre.ethers.
 
 // Your code here!
+console.log("HH Wrapped Ethers version:", hre.ethers.version);
 
 return;
 

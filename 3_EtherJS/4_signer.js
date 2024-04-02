@@ -57,6 +57,11 @@ console.log(signer.address);
 // Exercise 2. Sign something.
 //////////////////////////////
 
+// sign message using the wallet that's created using our private key -> creates signature
+// verifying the message needs the signature and the message itself -> returns the address of the signer
+// if another message is signed with the same signature, a different address that corresponds to the 
+// combination of the new message and the provided signature. which doesn't exist in the blockchain
+
 const sign = async (message = 'Hello world') => {
     const signature = await signer.signMessage(message);
     
@@ -77,13 +82,13 @@ const sign = async (message = 'Hello world') => {
         console.log('Tampered signature is valid.');
     }
     else {
-        console.log('Tampered signature is NOT valid.');
+        console.log('Tampered signature is NOT valid.' + " " + verifiedSigner2 + " " + signer.address);
     }
 
 
 };
 
-sign();
+// sign();
 
 // Exercise 3. Connect to the blockchain. 
 /////////////////////////////////////////
@@ -133,7 +138,7 @@ signer = new ethers.Wallet(process.env.METAMASK_PRIVATE_KEY, sepoliaProvider);
 
 // b. Instead of looking on Etherscan, wait for the transaction to be mined,
 // then compare the balance of both addresses before and after.
-// Hint: `sendTransaction()` returns an object with a `wait()` method.
+// Hint: `sendTransaction()` returns an object with a `wait()` method. 
 // Hint2: `formatEther()` can print a nicer balance.
 
 const account2 = process.env.METAMASK_2_ADDRESS;

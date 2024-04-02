@@ -4,6 +4,9 @@ const path = require('path');
 require('dotenv').config();
 const ethers = require("ethers");
 
+// print process.env file
+console.log(process.env);
+
 const providerKey = process.env.ALCHEMY_KEY;
 const sepoliaUrl = `${process.env.ALCHEMY_SEPOLIA_API_URL}${providerKey}`;
 const sepoliaProvider = new ethers.JsonRpcProvider(sepoliaUrl);
@@ -91,20 +94,22 @@ const checkGasPrices = async () => {
     console.log('Max Priority Fee (GWEI)', ethers.formatUnits(tx.maxPriorityFeePerGas, 'gwei'));
 
     console.log('---');
-    const feeData = await goerliProvider.getFeeData();
+    const feeData = await sepoliaProvider.getFeeData();
+
+    // Base Fee of Previous block is the the legacy price - the tip for the miner (priority fee)
 
     console.log('Legacy Gas Price (GWEI)', ethers.formatUnits(feeData.gasPrice, 'gwei'));
     console.log('Max Fee per Gas (GWEI)', ethers.formatUnits(feeData.maxFeePerGas, 'gwei'));
     console.log('Max Priority Fee (GWEI)', ethers.formatUnits(feeData.maxPriorityFeePerGas, 'gwei'));
 
     console.log('');
-    const lastBlock = await goerliProvider.getBlock('latest');
+    const lastBlock = await sepoliaProvider.getBlock('latest');
     console.log('Base Fee Previous Block (GWEI)', ethers.formatUnits(lastBlock.baseFeePerGas, 'gwei'));
 
     }, 1000);
 };
 
-checkGasPrices();
+// checkGasPrices();
 
 // d. Now that you understand everything, send a new transaction that is just
 // a little cheaper in terms of gas, compared to defaults.
@@ -123,6 +128,23 @@ checkGasPrices();
 const sendCheaperTransaction = async () => {
 
     // Your code here!
+    const feeData = await sepoliaProvider.getFeeData();
+    console.log(feeData);
+
+    console.log('Legacy Gas Price (GWEI)', ethers.formatUnits(feeData.gasPrice, 'gwei'));
+    console.log('Max Fee per Gas (GWEI)', ethers.formatUnits(feeData.maxFeePerGas, 'gwei'));
+    console.log('Max Priority Fee (GWEI)', ethers.formatUnits(feeData.maxPriorityFeePerGas, 'gwei'));
+
+    let tx = await signer.sendTransaction({
+        to: account2,
+        value: ethers.parseEther('0.01'),
+        maxFeePerGas: feeData.maxFeePerGas - 6000000000n
+    });
+
+    console.log("Transaction is in the mempool...");
+    let receipt = await tx.wait();
+    console.log(receipt)
+    console.log("Transaction mined!");
 
 };
 
@@ -163,6 +185,8 @@ const sendCheaperTransaction = async () => {
 const resubmitTransaction = async () => {
 
     // Your Code here!
+    
+
 
 };
 

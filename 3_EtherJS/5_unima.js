@@ -8,6 +8,8 @@
 // Hint: As you did multiple times now.
 
 // Your code here!
+require('dotenv').config();
+const ethers = require("ethers");
 
 
 // Exercise 1. Create a JSON RPC Provider for the (not) UniMa Blockchain.
@@ -27,6 +29,9 @@
 // Hint: only accessible within UniMa network.
 
 // Your code here!
+const notUniMaUrl = process.env.NOT_UNIMA_URL_1;
+const notUniMaProvider = new ethers.JsonRpcProvider(notUniMaUrl); 
+
 
 // Exercise 2. Let's query the provider.
 ////////////////////////////////////////
@@ -35,8 +40,13 @@
 // Print to console the network name, chain id, and block number of NUMA.
 
 const networkInfo = async () => {
-    
-    // Your code here!
+    let net = await notUniMaProvider.getNetwork();
+    console.log('NUMA Info:');
+    console.log('Network name: ', net.name);
+    console.log('Network chain id: ', Number(net.chainId));
+
+    let blockNumber = await notUniMaProvider.getBlockNumber();
+    console.log('Block number: ', blockNumber);
 
 };
 
@@ -49,16 +59,20 @@ const networkInfo = async () => {
 // a. Use the same non-sensitive private key used in 3_signer.js.
 
 // Your code here!
+const signer = new ethers.Wallet(process.env.METAMASK_PRIVATE_KEY,
+    notUniMaProvider);
 
 // b. Print the next nonce necessary to send a transaction.
 // Hint: .getNonce()
 
 const getNonce = async() => {
-    
-    // Your code here!
-};
 
-// getNonce();
+    let nonce = await signer.getNonce();
+    console.log('Your nonce is ' + nonce);
+
+}
+
+getNonce();
 
 // Checkpoint. Is the nonce in the (not) Unima blockchain different
 // than in Goerli?
@@ -75,11 +89,12 @@ const getNonce = async() => {
 
 const checkBalance = async () => {
 
-   // Your code here!
+    let balance = await notUniMaProvider.getBalance(signer.address);
 
+    console.log('My balance is ' + ethers.formatEther(balance) + ' NUMETH.');
 };
 
-// checkBalance();
+checkBalance();
 
 // Exercise 5. Send a transaction.
 //////////////////////////////////

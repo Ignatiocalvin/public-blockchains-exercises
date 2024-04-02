@@ -54,6 +54,7 @@ const providerKey = process.env.ALCHEMY_KEY;
 
 const mainnetUrl = `${process.env.ALCHEMY_MAINNET_API_URL}${providerKey}`
 const mainnetProvider = new ethers.JsonRpcProvider(mainnetUrl);
+
 // console.log(mainnetUrl)
 
 
@@ -75,7 +76,7 @@ const network = async () => {
     console.log('Provider\'s network chain id: ', Number(net.chainId));
 }
 
-// network();
+network();
 
 // The second (less compact) notation has the advantage that we can invoke
 // the code only when needed, so it is preferred in this exercise sheet.
@@ -255,6 +256,12 @@ const checkBlockTime2 = async (providerName = "mainnet", blocks2check = 3) => {
 // d. Transactions can be prefetched, so that you save one blockchain call.
 // Hint: pass `true` as second parameter to .getBlock(blockNumber, true).
 
+
+// get blocknumber
+// get block through block number
+// get transaction hash through block indexing
+// get transaction receipt through transaction hash
+
 const blockInfo = async () => {
     
     // Your code here!
@@ -273,7 +280,7 @@ const blockInfo = async () => {
 
     // Long list...
     block = await mainnetProvider.getBlock(blockNumber, true);
-    console.log(block.prefetchedTransactions);
+    // console.log(block.prefetchedTransactions);
 
 
 };
@@ -361,6 +368,9 @@ const { pathToFileURL } = require('url');
 // then invoke the appropriate smart contract method.
 // Hint2: want to try it with your own address? Get some LINK ERC20 tokens here: 
 // https://faucets.chain.link/goerli
+
+
+// contract needs address of smart contract, linkABI & provider
 
 const link = async () => {
    
